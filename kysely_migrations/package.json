@@ -1,0 +1,20 @@
+{
+  "name": "kysely_migrations",
+  "scripts": {
+    "build": "scripts/build.sh",
+    "migration:new": "scripts/MigrationTemplate.sh",
+    "migration:up": "scripts/MigrateToLatest.sh",
+    "migration:down": "scripts/MigrateToDown.sh"
+  },
+  "dependencies": {
+    "kysely": "^0.26.3",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "@types/pg": "^8.10.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

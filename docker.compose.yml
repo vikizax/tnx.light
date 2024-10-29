@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build:
@@ -25,3 +23,31 @@ services:
       - ./backend/.env
     volumes:
       - ./backend:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  kysely_migrations:
+    image: kysely_migrations:latest
+    build: kysely_migrations
+    container_name: kysely_migrations_prod
+    env_file:
+      - ./kysely_migrations/.env
+    depends_on:
+        - postgres
+    # entrypoint: ["/bin/bash","-c","while true; do echo \"Hello World\"; sleep 10; done;"]
+    # restart: on-failure
+
+volumes:
+  postgres_data:

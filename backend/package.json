@@ -11,7 +11,8 @@
     "start": "npm run build:ts && node dist/index.js",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
-    "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:start\""
+    "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:start\"",
+    "codegen": "kysely-codegen --out-file ./src/types/db/db.d.ts --dialect postgres --env-file ./.env"
   },
   "keywords": [],
   "author": "",
@@ -30,11 +31,13 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "@sinclair/typebox": "^0.33.17",
     "@types/node": "^22.1.0",
     "@types/pg": "^8.11.10",
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
     "fastify-tsconfig": "^2.0.0",
+    "kysely-codegen": "^0.17.0",
     "ts-node": "^10.4.0",
     "typescript": "^5.2.2"
   }

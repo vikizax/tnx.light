@@ -20,9 +20,9 @@ Once the `.ts` file created you can write your migration script, here's an examp
 import { Kysely, sql } from "kysely";
 
 export async function up(db: Kysely<any>): Promise<void> {
-  await db.schema.createSchema("DATA_STEROID").execute();
+  await db.schema.createSchema("SCHEMA").execute();
   await db.schema
-    .withSchema("DATA_STEROID")
+    .withSchema("SCHEMA")
     .createTable("Role")
     .addColumn("id", "integer", (col) => col.notNull().primaryKey().unique())
     .addColumn("name", "varchar", (col) => col.notNull().unique())
@@ -40,7 +40,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 export async function down(db: Kysely<any>) {
   await db.schema
-    .withSchema("DATA_STEROID")
+    .withSchema("SCHEMA")
     .dropTable("Roles")
     .cascade()
     .execute();

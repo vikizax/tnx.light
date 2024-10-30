@@ -12,10 +12,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
-
 RUN chmod +x scripts/*
-
 
 SHELL [ "/bin/bash" ]
 RUN ./scripts/build.sh

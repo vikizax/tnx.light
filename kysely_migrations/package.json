@@ -7,11 +7,10 @@
     "migration:down": "scripts/MigrateToDown.sh"
   },
   "dependencies": {
-    "kysely": "^0.26.3",
-    "pg": "^8.11.3"
+    "kysely": "^0.27.4",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
-    "bun-types": "latest",
     "@types/pg": "^8.10.4"
   },
   "peerDependencies": {

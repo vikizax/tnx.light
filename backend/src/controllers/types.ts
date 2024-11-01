@@ -1,17 +1,31 @@
 import { Type, Static } from "@sinclair/typebox";
 
-export const SpaceTnxQuerySchema = Type.Object({
+export const SpaceTnxParamsSchema = Type.Object({
   spaceId: Type.Number(),
 });
 
-export type SpaceTnxQuery = Static<typeof SpaceTnxQuerySchema>;
+export type SpaceTnxParams = Static<typeof SpaceTnxParamsSchema>;
 
 export const CreateSpaceTnxSchema = Type.Object({
-  type: Type.Union([Type.Literal("expanse"), Type.Literal("income")]),
+  type: Type.Union([Type.Literal("expense"), Type.Literal("income")]),
   amount: Type.Number({ minimum: 1 }),
-  createdAt: Type.Date(),
+  createdAt: Type.String({ format: "date-time" }),
   description: Type.Optional(Type.String()),
   category: Type.Optional(Type.String()),
 });
 
 export type CreateSpaceTnx = Static<typeof CreateSpaceTnxSchema>;
+
+export const UpdateSpaceTnxSchema = Type.Partial(CreateSpaceTnxSchema);
+
+export type UpdateSpaceTnx = Static<typeof UpdateSpaceTnxSchema>;
+
+export const UpdateSpaceTnxParamsSchema = Type.Intersect([
+  SpaceTnxParamsSchema,
+  Type.Object({ transactionId: Type.Number() }),
+]);
+
+export type UpdateSpaceTnxQuery = Static<typeof UpdateSpaceTnxParamsSchema>;
+
+export const DeleteSpaceTnxParamsSchema = UpdateSpaceTnxParamsSchema;
+export type DeleteSpaceTnxParams = Static<typeof DeleteSpaceTnxParamsSchema>;

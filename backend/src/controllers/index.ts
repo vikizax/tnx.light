@@ -4,14 +4,21 @@ import { CommonResponse, CommonResponseSchema } from "../types/common";
 import {
   createSpace,
   createTnxBySpaceId,
+  deleteTnxBySpaceIdTnxId,
   getAllTnxBySpaceId,
+  updateTnxBySpaceIdTnxId,
 } from "../services/space.service";
 import { logs } from "../utils/common";
 import {
   CreateSpaceTnx,
   CreateSpaceTnxSchema,
-  SpaceTnxQuery,
-  SpaceTnxQuerySchema,
+  DeleteSpaceTnxParams,
+  DeleteSpaceTnxParamsSchema,
+  SpaceTnxParams,
+  SpaceTnxParamsSchema,
+  UpdateSpaceTnx,
+  UpdateSpaceTnxQuery,
+  UpdateSpaceTnxSchema,
 } from "./types";
 
 export function SpaceActions(fastify: FastifyInstance) {
@@ -48,15 +55,15 @@ export function SpaceActions(fastify: FastifyInstance) {
 
   // get all space tnx
   fastify.get<{
-    Params: SpaceTnxQuery;
+    Params: SpaceTnxParams;
     Reply: CommonResponse;
   }>(
     "/spaces/:spaceId/transactions",
     {
       schema: {
-        params: SpaceTnxQuerySchema,
+        params: SpaceTnxParamsSchema,
         response: { 200: CommonResponseSchema },
-        tags: ["spaces", "transactions"],
+        tags: ["spaces"],
         description: "Get all space transactions",
       },
     },
@@ -83,16 +90,16 @@ export function SpaceActions(fastify: FastifyInstance) {
 
   // create a new tnx
   fastify.post<{
-    Params: SpaceTnxQuery;
+    Params: SpaceTnxParams;
     Reply: CommonResponse;
     Body: CreateSpaceTnx;
   }>(
     "/spaces/:spaceId/transactions",
     {
       schema: {
-        params: SpaceTnxQuerySchema,
+        params: SpaceTnxParamsSchema,
         response: { 200: CommonResponseSchema },
-        tags: ["spaces", "transactions"],
+        tags: ["spaces"],
         description: "Create a new transaction of a space",
         body: CreateSpaceTnxSchema,
       },
@@ -112,39 +119,82 @@ export function SpaceActions(fastify: FastifyInstance) {
         );
       }
 
-      return rep.code(201).send({ status: 201, msg: "Transaction created" });
+      return rep
+        .code(201)
+        .send({ status: 201, msg: "Transaction created successfully" });
     }
   );
 
   // update a space tnx
   fastify.put<{
+    Params: UpdateSpaceTnxQuery;
     Reply: CommonResponse;
+    Body: UpdateSpaceTnx;
   }>(
     "/spaces/:spaceId/transactions/:transactionId",
     {
       schema: {
-        params: SpaceTnxQuerySchema,
+        body: UpdateSpaceTnxSchema,
+        params: UpdateSpaceTnxSchema,
         response: { 200: CommonResponseSchema },
-        tags: ["spaces", "transactions"],
+        tags: ["spaces"],
         description: "Update a transaction of a space",
       },
     },
-    async (req, rep) => {}
+    async (req, rep) => {
+      const [_, error] = await intoResultAsync(
+        updateTnxBySpaceIdTnxId,
+        req.params.spaceId,
+        req.params.transactionId,
+        req.body
+      );
+
+      if (error) {
+        logs("Error >>");
+        logs(error);
+        return rep.internalServerError(
+          "Something went wrong while updating the transaction"
+        );
+      }
+
+      return rep
+        .code(200)
+        .send({ status: 200, msg: "Transaction updated successfully" });
+    }
   );
 
   // delete a space tnx
   fastify.delete<{
+    Params: DeleteSpaceTnxParams;
     Reply: CommonResponse;
   }>(
     "/spaces/:spaceId/transactions/:transactionId",
     {
       schema: {
-        params: SpaceTnxQuerySchema,
+        params: DeleteSpaceTnxParamsSchema,
         response: { 200: CommonResponseSchema },
-        tags: ["spaces", "transactions"],
+        tags: ["spaces"],
         description: "Delete a transaction of a space",
       },
     },
-    async (req, rep) => {}
+    async (req, rep) => {
+      const [_, error] = await intoResultAsync(
+        deleteTnxBySpaceIdTnxId,
+        req.params.spaceId,
+        req.params.transactionId
+      );
+
+      if (error) {
+        logs("Error >>");
+        logs(error);
+        return rep.internalServerError(
+          "Something went wrong while deleting the transaction"
+        );
+      }
+
+      return rep
+        .code(200)
+        .send({ status: 200, msg: "Transaction deleted successfully" });
+    }
   );
 }

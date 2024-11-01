@@ -1,7 +1,6 @@
 import { sql } from "kysely";
 import { db } from "../db";
-import { TNXSCHEMATransactions } from "../types/db/db";
-import { CreateSpaceTnx } from "../controllers/types";
+import { CreateSpaceTnx, UpdateSpaceTnx } from "../controllers/types";
 
 export async function createSpace() {
   const res = await db
@@ -43,5 +42,33 @@ export async function createTnxBySpaceId(
       description: payload.description,
       type: payload.type,
     })
+    .execute();
+}
+
+export async function updateTnxBySpaceIdTnxId(
+  spaceId: number,
+  tnxId: number,
+  payload: UpdateSpaceTnx
+) {
+  await db
+    .updateTable("TNX_SCHEMA.transactions")
+    .set({
+      amount: payload.amount,
+      category: payload.category,
+      description: payload.description,
+      created_at: payload.createdAt,
+      type: payload.type,
+      updated_at: sql`now()`,
+    })
+    .where("id", "=", tnxId + "")
+    .where("space_id", "=", spaceId + "")
+    .execute();
+}
+
+export async function deleteTnxBySpaceIdTnxId(spaceId: number, tnxId: number) {
+  await db
+    .deleteFrom("TNX_SCHEMA.transactions")
+    .where("id", "=", tnxId + "")
+    .where("space_id", "=", spaceId + "")
     .execute();
 }

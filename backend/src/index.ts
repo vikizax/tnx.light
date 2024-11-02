@@ -7,26 +7,13 @@ import swaggerUI from "@fastify/swagger-ui";
 import fastifyMutipart from "@fastify/multipart";
 
 (async () => {
-  const server = fastify({
-    // logger: {
-    //   transport:
-    //     process.env.ENVIRONMENT === "DEV"
-    //       ? {
-    //           target: "pino-pretty",
-    //           options: {
-    //             translateTime: "HH:MM:ss Z",
-    //             ignore: "pid,hostname",
-    //           },
-    //         }
-    //       : undefined,
-    // },
-  });
+  const server = fastify();
 
   server.register(fastifyMutipart, { limits: { fileSize: 250 * 1024 * 1024 } });
 
   server.register(cors, {
     origin: "*",
-    // preflight: true,
+    preflight: true,
   });
 
   server.register(swagger, {
@@ -40,7 +27,6 @@ import fastifyMutipart from "@fastify/multipart";
 
   server.register(swaggerUI, {
     routePrefix: "/docs",
-    staticCSP: true,
   });
 
   server.register(app);

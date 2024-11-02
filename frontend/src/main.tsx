@@ -8,13 +8,19 @@ import "@fontsource/roboto/700.css";
 import "./index.css";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
-
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 const queryClient = new QueryClient();
+
+const theme = createTheme({
+
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ThemeProvider theme={theme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>
 );

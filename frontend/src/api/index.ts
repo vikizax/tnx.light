@@ -16,8 +16,24 @@ export type GetAllTransactions = {
 
 export async function getAllTransactions(): Promise<GetAllTransactions> {
   const response = await fetch(
-    "http://localhost:4000/api/spaces/1/transactions"
+    `${import.meta.env.VITE_API_URL}/api/spaces/1/transactions`
   );
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+}
+
+export type CreateSpace = {
+  status: number;
+  data: string;
+  msg: string;
+};
+
+export async function createSpace(): Promise<CreateSpace> {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/spaces`, {
+    method: "POST",
+  });
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }

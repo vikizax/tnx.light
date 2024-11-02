@@ -1,0 +1,12 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    height: 100dvh;
+    width: 100dvw;
+    background-color: #121212;
+}
+
+#root {
+    height: 100%;
+    width: 100%;
+}

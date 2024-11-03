@@ -67,6 +67,20 @@ const DataTable = ({ data, totalPage }: DataTableProps) => {
               </TableRow>
             )
           )}
+          {data.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} sx={{ textAlign: "center" }}>
+                no data ,maybe check your{" "}
+                <strong>
+                  <u>filters</u>
+                </strong>{" "}
+                or try adding{" "}
+                <strong>
+                  <u>new transaction</u>
+                </strong>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
 
         <TableFooter>

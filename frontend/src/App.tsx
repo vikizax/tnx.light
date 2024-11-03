@@ -1,25 +1,31 @@
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
+import CircularProgress from "@mui/material/CircularProgress";
 
+import { Container, Stack, Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { createSpace } from "./api";
-import { Box, Container, Stack, Typography } from "@mui/material";
-import { ColorPalette } from "./utils/commons/color-palette";
 import { Fragment } from "react/jsx-runtime";
+import { createSpace } from "./api";
 import ActionButton from "./components/action-button";
+import { ColorPalette } from "./utils/commons/color-palette";
 
 function App() {
   const navigate = useNavigate();
+  const localSpaceId = localStorage.getItem("spaceId");
   const { mutateAsync, status } = useMutation({
     mutationFn: createSpace,
   });
 
   const handleStartAction = async () => {
+    console.log({ localSpaceId });
+    if (localSpaceId) {
+      navigate(`space/${localSpaceId}/transactions`);
+      return;
+    }
     const { data: spaceId } = await mutateAsync();
 
     if (spaceId !== undefined) {
+      localStorage.setItem("spaceId", spaceId + "");
       navigate(`space/${spaceId}/transactions`);
     }
   };

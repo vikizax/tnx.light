@@ -1,6 +1,10 @@
 import { sql } from "kysely";
 import { db } from "../db";
-import { CreateSpaceTnx, UpdateSpaceTnx } from "../controllers/types";
+import {
+  CreateSpaceTnx,
+  GetAllTransactionsQueryParams,
+  UpdateSpaceTnx,
+} from "../controllers/types";
 
 export async function createSpace() {
   const res = await db
@@ -15,17 +19,49 @@ export async function getAllTnxBySpaceId(
   spaceId: number,
   limit: number = 10,
   page: number = 1,
-  filters?: any
+  filters?: Omit<GetAllTransactionsQueryParams, "limit" | "page">
 ) {
-  const res = await db
+  let totaltnxCursor = db
+    .selectFrom("TNX_SCHEMA.transactions")
+    .select(({ fn }) => fn.countAll().as("count"))
+    .where("space_id", "=", spaceId + "");
+
+  let resCursor = db
     .selectFrom("TNX_SCHEMA.transactions")
     .selectAll()
-    .where("space_id", "=", spaceId + "")
+    .where("space_id", "=", spaceId + "");
+
+  if (filters?.type) {
+    resCursor = resCursor.where("type", "=", filters.type);
+    totaltnxCursor = totaltnxCursor.where("type", "=", filters.type);
+  }
+
+  if (filters?.date) {
+    resCursor = resCursor.where("created_at", "=", new Date(filters.date));
+    totaltnxCursor = totaltnxCursor.where(
+      "created_at",
+      "=",
+      new Date(filters.date)
+    );
+  }
+  
+  if (filters?.category) {
+    resCursor = resCursor.where("category", "=", filters.category);
+    totaltnxCursor = totaltnxCursor.where("category", "=", filters.category);
+  }
+
+  const totaltnx = await totaltnxCursor.executeTakeFirst();
+
+  const res = await resCursor
     .limit(limit)
     .offset(limit * (page - 1))
     .execute();
 
-  return res;
+  return {
+    transactions: res,
+    total: totaltnx?.count ? parseInt(totaltnx.count + "") : 0,
+    total_page: totaltnx ? Math.ceil(parseInt(totaltnx.count + "") / limit) : 0,
+  };
 }
 
 export async function createTnxBySpaceId(

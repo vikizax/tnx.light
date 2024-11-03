@@ -8,7 +8,7 @@ export type PageHeadProps = {
 
 const PageHead: React.FC<PageHeadProps> = (props) => {
   return (
-    <Stack>
+    <Stack padding={1}>
       <Typography variant="h2" color={`${ColorPalette.color}`}>
         {props.heading}
       </Typography>

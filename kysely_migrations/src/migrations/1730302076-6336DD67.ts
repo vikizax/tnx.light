@@ -17,8 +17,8 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("category", "varchar")
     .addColumn("amount", "numeric(15, 2)", (cb) => cb.notNull())
     .addColumn("description", "varchar")
-    .addColumn("created_at", "timestamp", (cb) => cb.defaultTo(sql`now()`))
-    .addColumn("updated_at", "timestamp", (cb) => cb.defaultTo(sql`now()`))
+    .addColumn("created_at", "date", (cb) => cb.defaultTo(sql`now()`))
+    .addColumn("updated_at", "date", (cb) => cb.defaultTo(sql`now()`))
     .addForeignKeyConstraint(
       "space_tnx_cons",
       ["space_id"],

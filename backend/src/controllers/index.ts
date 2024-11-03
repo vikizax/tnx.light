@@ -14,6 +14,8 @@ import {
   CreateSpaceTnxSchema,
   DeleteSpaceTnxParams,
   DeleteSpaceTnxParamsSchema,
+  GetAllTransactionsQueryParams,
+  GetAllTransactionsQueryParamsSchema,
   SpaceTnxParams,
   SpaceTnxParamsSchema,
   UpdateSpaceTnx,
@@ -55,12 +57,14 @@ export function SpaceActions(fastify: FastifyInstance) {
 
   // get all space tnx
   fastify.get<{
+    Querystring: GetAllTransactionsQueryParams;
     Params: SpaceTnxParams;
     Reply: CommonResponse;
   }>(
     "/spaces/:spaceId/transactions",
     {
       schema: {
+        querystring: GetAllTransactionsQueryParamsSchema,
         params: SpaceTnxParamsSchema,
         response: { 200: CommonResponseSchema },
         tags: ["spaces"],
@@ -68,9 +72,13 @@ export function SpaceActions(fastify: FastifyInstance) {
       },
     },
     async (req, rep) => {
+      const { limit, page, ...filters } = req.query;
       const [tnxs, error] = await intoResultAsync(
         getAllTnxBySpaceId,
-        req.params.spaceId
+        req.params.spaceId,
+        limit ?? 10,
+        page ?? 1,
+        filters
       );
 
       if (error) {

@@ -1,21 +1,43 @@
 import {
   Table,
-  TableContainer,
-  TableCell,
-  TableRow,
   TableBody,
-  TableHead,
+  TableCell,
+  TableContainer,
   TableFooter,
-  TablePagination
+  TableHead,
+  TablePagination,
+  TableRow,
 } from "@mui/material";
 import { ColorPalette } from "../../utils/commons/color-palette";
 import TablePaginationActions from "./_components/TablePaginationActions";
+import { Transaction } from "../../api/types";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getFilterValueTyped,
+  setFilter,
+} from "../../store/slices/transactionFilters.slice";
+import { RootState } from "../../store";
 
-const DataTable: React.FC = () => {
+type DataTableProps = {
+  data: Transaction[];
+  totalPage: number;
+  currentPage?: number;
+};
+
+const DataTable = ({ data, totalPage }: DataTableProps) => {
+  const dispatch = useDispatch();
+  // const [page, setPage] = useState(0);
+  // const [rows, setRows] = useState(10);
+
+  const page = useSelector((state: RootState) => state.transactionFilter.page);
+  const rows = useSelector((state: RootState) => state.transactionFilter.limit);
+
   return (
-    <TableContainer>
+    <TableContainer sx={{ overflow: "auto", maxWidth: "100%", padding: 0 }}>
       <Table
         sx={{
+          minWidth: "650px",
           color: ColorPalette.color,
           "& .MuiTableCell-root": {
             color: ColorPalette.color,
@@ -27,46 +49,26 @@ const DataTable: React.FC = () => {
           <TableRow>
             <TableCell>tnxid</TableCell>
             <TableCell>amount</TableCell>
-            <TableCell>type</TableCell>
             <TableCell>category</TableCell>
             <TableCell>description</TableCell>
             <TableCell>date</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
-          <TableRow>
-            <TableCell>1</TableCell>
-            <TableCell>100.00</TableCell>
-            <TableCell>income</TableCell>
-            <TableCell>test</TableCell>
-            <TableCell>test description</TableCell>
-            <TableCell>01-02-2024</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>2</TableCell>
-            <TableCell>200.00</TableCell>
-            <TableCell>income</TableCell>
-            <TableCell>test</TableCell>
-            <TableCell>test description</TableCell>
-            <TableCell>02-02-2024</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>3</TableCell>
-            <TableCell>300.00</TableCell>
-            <TableCell>income</TableCell>
-            <TableCell>test</TableCell>
-            <TableCell>test description</TableCell>
-            <TableCell>03-02-2024</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>4</TableCell>
-            <TableCell>100.00</TableCell>
-            <TableCell>income</TableCell>
-            <TableCell>test</TableCell>
-            <TableCell>test description</TableCell>
-            <TableCell>04-02-2024</TableCell>
-          </TableRow>
+          {data.map(
+            ({ id, amount, category, created_at, description }, idx) => (
+              <TableRow key={`${idx}-${id}`}>
+                <TableCell>{id}</TableCell>
+                <TableCell>{amount}</TableCell>
+                <TableCell>{category}</TableCell>
+                <TableCell>{description}</TableCell>
+                <TableCell>{created_at.split("T")[0]}</TableCell>
+              </TableRow>
+            )
+          )}
         </TableBody>
+
         <TableFooter>
           <TableRow>
             <TablePagination
@@ -74,9 +76,9 @@ const DataTable: React.FC = () => {
                 color: "white",
               }}
               rowsPerPageOptions={[5, 10, 20]}
-              colSpan={6}
-              page={1}
-              count={10}
+              colSpan={5}
+              page={page - 1}
+              count={totalPage}
               slotProps={{
                 select: {
                   inputProps: {
@@ -86,9 +88,23 @@ const DataTable: React.FC = () => {
                 },
               }}
               align="right"
-              rowsPerPage={10}
-              onPageChange={() => {}}
-              onRowsPerPageChange={() => {}}
+              rowsPerPage={rows}
+              onPageChange={(_, page) => {
+                dispatch(
+                  setFilter({
+                    filter: "page",
+                    value: getFilterValueTyped("page", page + 1),
+                  })
+                );
+              }}
+              onRowsPerPageChange={(e) => {
+                dispatch(
+                  setFilter({
+                    filter: "limit",
+                    value: getFilterValueTyped("limit", +e.target.value),
+                  })
+                );
+              }}
               ActionsComponent={TablePaginationActions}
             />
           </TableRow>

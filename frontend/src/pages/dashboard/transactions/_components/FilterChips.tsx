@@ -1,19 +1,24 @@
-import { Chip, Stack } from "@mui/material";
+import { Chip, Stack, useMediaQuery, useTheme } from "@mui/material";
 import { ColorPalette } from "../../../../utils/commons/color-palette";
 
 export type FilterChipProps = {
-  data: { id: number; label: string }[];
+  data: { key: string; value: string }[];
   prefix?: string;
   onDelete?: (
-    id: number,
+    key: string,
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => void;
 };
 
 const FilterChip: React.FC<FilterChipProps> = ({ data, prefix, onDelete }) => {
+  const theme = useTheme();
+  const isScreenSmall = useMediaQuery(theme.breakpoints.between(0, 660));
   return (
-    <Stack direction={"row"} overflow={"auto"} gap={1}>
-      <div onClick={(e) => {}}></div>
+    <Stack
+      direction={"row"}
+      gap={1}
+      flexWrap={isScreenSmall ? "wrap" : "nowrap"}
+    >
       {data.map((filter, idx) => (
         <Chip
           sx={{
@@ -24,11 +29,11 @@ const FilterChip: React.FC<FilterChipProps> = ({ data, prefix, onDelete }) => {
             },
             fontWeight: "medium",
           }}
-          label={prefix ? prefix + filter.label : "@" + filter.label}
+          label={prefix ? prefix + filter.value : "@" + filter.value}
           key={`${idx}-${filter}`}
           variant="outlined"
           onDelete={
-            onDelete ? (event) => onDelete(filter.id, event) : undefined
+            onDelete ? (event) => onDelete(filter.key, event) : undefined
           }
         />
       ))}

@@ -17,8 +17,6 @@ export type TablePaginationActionsProps = {
 function TablePaginationActions(props: TablePaginationActionsProps) {
   const { count, page, rowsPerPage, onPageChange } = props;
 
-  console.log()
-
   const handleFirstPageButtonClick = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {

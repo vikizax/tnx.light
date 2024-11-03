@@ -16,10 +16,10 @@ import PageHead from "../../../components/page-head";
 import { ColorPalette, Units } from "../../../utils/commons/color-palette";
 import FilterChip from "./_components/FilterChips";
 import MenuFilters from "./_components/MenuFilters";
-import AddTnxDrawer from "./_components/AddTnxDrawer";
-import { useQuery } from "@tanstack/react-query";
+import TnxDrawer from "./_components/TnxDrawer";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 type MenuFilterOption = "category" | "date";
-import { getAllTransactions } from "../../../api";
+import { deleteTransactionByTnxIdAndSpaceId } from "../../../api";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -27,8 +27,10 @@ import {
   getFilterValueTyped,
   TransactionFiltersState,
 } from "../../../store/slices/transactionFilters.slice";
+import { open } from "../../../store/slices/snack.slice";
 import { RootState } from "../../../store";
 import { useTransactions } from "../../../hooks/useTransactions";
+import { Transaction } from "../../../api/types";
 
 const TransactionsPage = () => {
   const theme = useTheme();
@@ -39,12 +41,18 @@ const TransactionsPage = () => {
   const params = useParams<{ spaceId: string }>();
   const dispatch = useDispatch();
   const filters = useSelector((state: RootState) => state.transactionFilter);
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useTransactions(params.spaceId!);
 
-  const { data, isLoading, isFetchedAfterMount } = useTransactions(
-    params.spaceId!
-  );
-
-  console.log({ isFetchedAfterMount });
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: async ({
+      spaceId,
+      tnxId,
+    }: {
+      spaceId: string;
+      tnxId: string;
+    }) => await deleteTransactionByTnxIdAndSpaceId(spaceId, tnxId),
+  });
 
   let filterChipValues = Object.keys(filters)
     .filter(
@@ -66,8 +74,14 @@ const TransactionsPage = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const [editTnx, setEditTnx] = useState<Omit<
+    Transaction,
+    "space_id" | "updated_at"
+  > | null>(null);
+
   const toggleDrawer = (newOpen: boolean) => () => {
     setDrawerOpen(newOpen);
+    setEditTnx(null);
   };
 
   const [currentActiveMenuOpts, setCurrentActiveMenuOpts] =
@@ -76,6 +90,7 @@ const TransactionsPage = () => {
   const handleFilterBtnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
   };
+
   const handleFilterMenuClick = (menuOption: MenuFilterOption) => {
     setMenuAnchorEl(null);
     setCurrentActiveMenuOpts(menuOption);
@@ -83,6 +98,17 @@ const TransactionsPage = () => {
     if (menuOptionRef.current) {
       menuOptionRef.current.focus();
     }
+  };
+
+  const handleTransactionDelete = async (id: string) => {
+    await mutateAsync({
+      spaceId: params.spaceId!,
+      tnxId: id,
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["transactions"],
+    });
+    dispatch(open("transaction deleted"));
   };
 
   useEffect(() => {
@@ -118,7 +144,7 @@ const TransactionsPage = () => {
           </ActionButton>
         </Stack>
 
-        {isLoading && !isFetchedAfterMount && (
+        {(isLoading || isPending) && (
           <CircularProgress
             sx={{
               color: ColorPalette.color,
@@ -127,7 +153,7 @@ const TransactionsPage = () => {
           />
         )}
 
-        {!isLoading && (
+        {!isLoading && !isPending && (
           <Stack direction={"row"} gap={4} flexWrap="wrap" padding={1}>
             <Stack gap={1} direction={isScreenSmall ? "row" : "column"}>
               <ActionButton
@@ -234,13 +260,24 @@ const TransactionsPage = () => {
                 <DataTable
                   data={data?.data.transactions ?? []}
                   totalPage={data?.data.total ?? 0}
+                  editHandler={(id) => {
+                    const tnx = data!.data.transactions.find(
+                      (tnx) => tnx.id === id
+                    );
+                    setEditTnx(tnx ?? null);
+                  }}
+                  deleteHandler={handleTransactionDelete}
                 />
               </Box>
             </Stack>
           </Stack>
         )}
       </Stack>
-      <AddTnxDrawer open={drawerOpen} toggleDrawer={toggleDrawer} />
+      <TnxDrawer
+        open={editTnx ? true : drawerOpen}
+        toggleDrawer={toggleDrawer}
+        mode={editTnx ? { type: "update", data: editTnx } : { type: "add" }}
+      />
     </>
   );
 };

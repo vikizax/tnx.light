@@ -25,7 +25,7 @@ import { open } from "../../../../store/slices/snack.slice";
 
 type TnxFormData = {
   type: "income" | "expense";
-  amount: number | "";
+  amount: string | "";
   category: string;
   date: string;
   description: string;
@@ -35,8 +35,10 @@ type TnxFormData = {
 
 const AddTnxForm = ({
   toggleDrawer,
+  initialFormData,
 }: {
   toggleDrawer: (newOpen: boolean) => () => void;
+  initialFormData?: TnxFormData;
 }) => {
   const params = useParams<{ spaceId: string }>();
 
@@ -55,15 +57,17 @@ const AddTnxForm = ({
     onError: () => dispatch(open("something went wrong. try again")),
   });
 
-  const [formData, setFormData] = useState<TnxFormData>({
-    type: "income",
-    amount: "",
-    category: "",
-    date: "",
-    description: "",
-    isRecurring: false,
-    recurrenceFrequency: "weekly",
-  });
+  const [formData, setFormData] = useState<TnxFormData>(
+    initialFormData ?? {
+      type: "income",
+      amount: "",
+      category: "",
+      date: "",
+      description: "",
+      isRecurring: false,
+      recurrenceFrequency: "weekly",
+    }
+  );
 
   const handleChange = (
     event:

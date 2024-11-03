@@ -1,4 +1,7 @@
 import {
+  Divider,
+  IconButton,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -8,28 +11,32 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import { ColorPalette } from "../../utils/commons/color-palette";
-import TablePaginationActions from "./_components/TablePaginationActions";
-import { Transaction } from "../../api/types";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Transaction } from "../../api/types";
+import { RootState } from "../../store";
 import {
   getFilterValueTyped,
   setFilter,
 } from "../../store/slices/transactionFilters.slice";
-import { RootState } from "../../store";
+import { ColorPalette } from "../../utils/commons/color-palette";
+import TablePaginationActions from "./_components/TablePaginationActions";
+import { Delete, Edit } from "@mui/icons-material";
 
 type DataTableProps = {
   data: Transaction[];
   totalPage: number;
   currentPage?: number;
+  editHandler: (id: string) => Promise<void> |  void;
+  deleteHandler: (id: string) => Promise<void> |  void;
 };
 
-const DataTable = ({ data, totalPage }: DataTableProps) => {
+const DataTable = ({
+  data,
+  totalPage,
+  editHandler,
+  deleteHandler,
+}: DataTableProps) => {
   const dispatch = useDispatch();
-  // const [page, setPage] = useState(0);
-  // const [rows, setRows] = useState(10);
-
   const page = useSelector((state: RootState) => state.transactionFilter.page);
   const rows = useSelector((state: RootState) => state.transactionFilter.limit);
 
@@ -52,6 +59,7 @@ const DataTable = ({ data, totalPage }: DataTableProps) => {
             <TableCell>category</TableCell>
             <TableCell>description</TableCell>
             <TableCell>date</TableCell>
+            <TableCell>actions</TableCell>
           </TableRow>
         </TableHead>
 
@@ -64,6 +72,27 @@ const DataTable = ({ data, totalPage }: DataTableProps) => {
                 <TableCell>{category}</TableCell>
                 <TableCell>{description}</TableCell>
                 <TableCell>{created_at.split("T")[0]}</TableCell>
+                <TableCell>
+                  <Stack direction={"row"} gap={2}>
+                    <IconButton onClick={() => editHandler(id)}>
+                      <Edit
+                        sx={{ color: ColorPalette.colorLight }}
+                        fontSize="small"
+                      />
+                    </IconButton>
+                    <Divider
+                      orientation="vertical"
+                      sx={{ borderColor: ColorPalette.borderColor }}
+                      flexItem
+                    />
+                    <IconButton onClick={() => deleteHandler(id)}>
+                      <Delete
+                        sx={{ color: ColorPalette.colorLight }}
+                        fontSize="small"
+                      />
+                    </IconButton>
+                  </Stack>
+                </TableCell>
               </TableRow>
             )
           )}
@@ -90,7 +119,7 @@ const DataTable = ({ data, totalPage }: DataTableProps) => {
                 color: "white",
               }}
               rowsPerPageOptions={[5, 10, 20]}
-              colSpan={5}
+              colSpan={6}
               page={page - 1}
               count={totalPage}
               slotProps={{

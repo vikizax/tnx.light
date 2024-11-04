@@ -9,6 +9,7 @@ export const pgPool = new Pool({
   user: process.env["POSTGRES_USER"],
   port: 5432,
   max: 20,
+  ssl: process.env["ENVIRONMENT"] === "DEV" ? false : true,
 });
 
 const dialect = new PostgresDialect({

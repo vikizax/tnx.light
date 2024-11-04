@@ -32,6 +32,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./frontend  # Path to your frontend Dockerfile directory
+          file: ./frontend/DockerFile.prod
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
 
@@ -40,6 +41,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./backend  # Path to your backend Dockerfile directory
+          file: ./backend/DockerFile.prod
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
 

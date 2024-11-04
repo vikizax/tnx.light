@@ -2,10 +2,10 @@ import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { Container, Stack, Typography } from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Fragment } from "react/jsx-runtime";
-import { createSpace } from "./api";
+import { checkSpaceExists, createSpace } from "./api";
 import ActionButton from "./components/action-button";
 import { ColorPalette } from "./utils/commons/color-palette";
 
@@ -13,15 +13,24 @@ function App() {
   const navigate = useNavigate();
   const localSpaceId = localStorage.getItem("spaceId");
   const { mutateAsync, status } = useMutation({
-    mutationFn: createSpace,
+    mutationFn:  createSpace,
   });
 
+  const {refetch: isExist} = useQuery({
+    queryKey: ['spaceCheck'],
+    queryFn: () => checkSpaceExists(localSpaceId!),
+    enabled: false
+  })  
+
   const handleStartAction = async () => {
-    console.log({ localSpaceId });
     if (localSpaceId) {
-      navigate(`space/${localSpaceId}/transactions`);
-      return;
+      const res = await isExist()
+      if(res.data?.data) {
+        navigate(`space/${localSpaceId}/transactions`);
+        return;
+      }
     }
+
     const { data: spaceId } = await mutateAsync();
 
     if (spaceId !== undefined) {

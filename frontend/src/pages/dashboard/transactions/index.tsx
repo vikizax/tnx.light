@@ -9,28 +9,28 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { deleteTransactionByTnxIdAndSpaceId } from "../../../api";
+import { Transaction } from "../../../api/types";
 import ActionButton from "../../../components/action-button";
 import DataTable from "../../../components/data-table";
 import PageHead from "../../../components/page-head";
+import { useTransactions } from "../../../hooks/useTransactions";
+import { RootState } from "../../../store";
+import { open } from "../../../store/slices/snack.slice";
+import {
+  getFilterValueTyped,
+  setFilter,
+  TransactionFiltersState,
+} from "../../../store/slices/transactionFilters.slice";
 import { ColorPalette, Units } from "../../../utils/commons/color-palette";
 import FilterChip from "./_components/FilterChips";
 import MenuFilters from "./_components/MenuFilters";
 import TnxDrawer from "./_components/TnxDrawer";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 type MenuFilterOption = "category" | "date";
-import { deleteTransactionByTnxIdAndSpaceId } from "../../../api";
-import { useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setFilter,
-  getFilterValueTyped,
-  TransactionFiltersState,
-} from "../../../store/slices/transactionFilters.slice";
-import { open } from "../../../store/slices/snack.slice";
-import { RootState } from "../../../store";
-import { useTransactions } from "../../../hooks/useTransactions";
-import { Transaction } from "../../../api/types";
 
 const TransactionsPage = () => {
   const theme = useTheme();

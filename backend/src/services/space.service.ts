@@ -6,6 +6,16 @@ import {
   UpdateSpaceTnx,
 } from "../controllers/types";
 
+export async function checkSpaceExists(spaceId:number) {
+  const res = await db
+    .selectFrom('TNX_SCHEMA.spaces')
+    .select(({fn}) => fn.countAll().as('count'))
+    .where('id', '=', spaceId+'')
+    .executeTakeFirst()
+  
+    return res ? parseInt(res.count+'') > 0 : false
+}
+
 export async function createSpace() {
   const res = await db
     .insertInto("TNX_SCHEMA.spaces")

@@ -40,3 +40,5 @@ export type CreateTransactionPayload = {
   description?: string;
   createdAt: string;
 };
+
+export type UpdateTransactionPayload = Omit<CreateTransactionPayload, 'spaceId'>

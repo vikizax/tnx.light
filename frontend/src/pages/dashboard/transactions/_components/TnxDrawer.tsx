@@ -10,23 +10,24 @@ import {
 } from "@mui/material";
 import ActionButton from "../../../../components/action-button";
 import { ColorPalette } from "../../../../utils/commons/color-palette";
-import AddTnxForm from "./AddTnxForm";
+import TnxForm from "./TnxForm";
 import { Transaction } from "../../../../api/types";
 
-export type AddTnxDrawerProps = {
-  open: boolean;
-  toggleDrawer: (newOpen: boolean) => () => void;
-  mode:
-    | {
-        type: "add";
-      }
-    | {
-        type: "update";
-        data: Omit<Transaction, "updated_at" | "space_id">;
-      };
+type TnxModeDrawerType = {
+  type: "add";
+}
+| {
+  type: "update";
+  data: Omit<Transaction, "updated_at" | "space_id">;
 };
 
-const TnxDrawer = ({ open, toggleDrawer, mode }: AddTnxDrawerProps) => {
+export type TnxDrawerProps = {
+  open: boolean;
+  toggleDrawer: (newOpen: boolean) => () => void;
+  mode: TnxModeDrawerType
+};
+
+const TnxDrawer = ({ open, toggleDrawer, mode }: TnxDrawerProps) => {
   const theme = useTheme();
   const isDrawerFullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -59,12 +60,13 @@ const TnxDrawer = ({ open, toggleDrawer, mode }: AddTnxDrawerProps) => {
         <Divider
           sx={{ borderColor: ColorPalette.borderColor, marginBottom: 2 }}
         />
-        <AddTnxForm
+        <TnxForm
           toggleDrawer={toggleDrawer}
           initialFormData={
             mode.type === "update"
               ? {
                   ...mode.data,
+                  tnxId: mode.data.id,
                   date: mode.data.created_at.split('T')[0],
                   isRecurring: false,
                   recurrenceFrequency: "weekly",

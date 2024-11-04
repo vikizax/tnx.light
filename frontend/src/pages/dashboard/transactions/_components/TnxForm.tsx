@@ -18,10 +18,11 @@ import InputField from "../../../../components/input";
 import SelectField from "../../../../components/select";
 import { ColorPalette } from "../../../../utils/commons/color-palette";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTransaction } from "../../../../api/";
+import { createTransaction, updateTransactionByTnxIdAndSpaceId } from "../../../../api";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { open } from "../../../../store/slices/snack.slice";
+import { UpdateTransactionPayload } from "../../../../api/types";
 
 type TnxFormData = {
   type: "income" | "expense";
@@ -33,17 +34,29 @@ type TnxFormData = {
   recurrenceFrequency: "weekly" | "monthly";
 };
 
-const AddTnxForm = ({
+const TnxForm = ({
   toggleDrawer,
   initialFormData,
 }: {
   toggleDrawer: (newOpen: boolean) => () => void;
-  initialFormData?: TnxFormData;
+  initialFormData?: TnxFormData & {tnxId: string};
 }) => {
   const params = useParams<{ spaceId: string }>();
 
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
+
+  const [formData, setFormData] = useState<TnxFormData>(
+    initialFormData ?? {
+      type: "income",
+      amount: "",
+      category: "",
+      date: "",
+      description: "",
+      isRecurring: false,
+      recurrenceFrequency: "weekly",
+    }
+  );
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: createTransaction,
@@ -57,17 +70,17 @@ const AddTnxForm = ({
     onError: () => dispatch(open("something went wrong. try again")),
   });
 
-  const [formData, setFormData] = useState<TnxFormData>(
-    initialFormData ?? {
-      type: "income",
-      amount: "",
-      category: "",
-      date: "",
-      description: "",
-      isRecurring: false,
-      recurrenceFrequency: "weekly",
+  const {mutateAsync: updateMutateAsync, isPending: isPendingUpdate} = useMutation({
+    mutationFn:async ({spaceId,tnxId, payload}: {spaceId:string, tnxId:string, payload: UpdateTransactionPayload}) => updateTransactionByTnxIdAndSpaceId(spaceId, tnxId,payload),
+    onSuccess: async() => {
+      toggleDrawer(false)();
+      dispatch(open("transaction updated"));
+      await queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+      });
     }
-  );
+  })
+
 
   const handleChange = (
     event:
@@ -92,16 +105,27 @@ const AddTnxForm = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(formData);
+    console.log({initialFormData, formData})
+    if(initialFormData) {
+      await updateMutateAsync({
+        spaceId: params.spaceId!,
+        tnxId: initialFormData.tnxId,
+        payload: {
+          ...formData,
+          createdAt: formData.date
+        }
+      })
+    }else {
+      await mutateAsync({
+        spaceId: params.spaceId!,
+        amount: formData.amount + "",
+        createdAt: formData.date,
+        type: formData.type,
+        category: formData.category,
+        description: formData.description,
+      });
+    }
 
-    await mutateAsync({
-      spaceId: params.spaceId!,
-      amount: formData.amount + "",
-      createdAt: formData.date,
-      type: formData.type,
-      category: formData.category,
-      description: formData.description,
-    });
   };
 
   return (
@@ -249,7 +273,7 @@ const AddTnxForm = ({
 
           <Grid size={{ xs: 12 }}>
             <ActionButton type="submit" fullWidth>
-              {isPending ? (
+              {isPending || isPendingUpdate ? (
                 <CircularProgress
                   sx={{
                     color: ColorPalette.color,
@@ -267,4 +291,4 @@ const AddTnxForm = ({
   );
 };
 
-export default AddTnxForm;
+export default TnxForm;

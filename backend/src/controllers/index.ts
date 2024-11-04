@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { intoResultAsync } from "../utils/result";
 import { CommonResponse, CommonResponseSchema } from "../types/common";
 import {
+  checkSpaceExists,
   createSpace,
   createTnxBySpaceId,
   deleteTnxBySpaceIdTnxId,
@@ -24,6 +25,39 @@ import {
 } from "./types";
 
 export function SpaceActions(fastify: FastifyInstance) {
+    // check space exists
+    fastify.get<{ Reply: CommonResponse, Params: SpaceTnxParams }>(
+      "/spaces/:spaceId/status",
+      {
+        schema: {
+          tags: ["spaces"],
+          description: "Check if space exists",
+          response: {
+            200: CommonResponseSchema,
+          },
+          params: SpaceTnxParamsSchema
+        },
+      },
+      async (req, rep) => {
+        
+        const [isExists, error] = await intoResultAsync(checkSpaceExists, req.params.spaceId);
+        
+        if (error) {
+          logs("ERROR >> ");
+          logs(error);
+          return rep.internalServerError(
+            "Something went wrong while checking for space"
+          );
+        }
+  
+        return rep.code(200).send({
+          status: 200,
+          data: isExists,
+        });
+      }
+    );
+
+
   // create a space
   fastify.post<{ Reply: CommonResponse }>(
     "/spaces",

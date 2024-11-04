@@ -5,6 +5,7 @@ import {
   CreateSpace,
   CreateTransactionPayload,
   GetAllTransactions,
+  UpdateTransactionPayload,
 } from "./types";
 
 export async function getAllTransactions(
@@ -73,7 +74,7 @@ export async function deleteTransactionByTnxIdAndSpaceId(
   spaceId: string,
   tnxId: string
 ) {
-  await sleep(5000);
+  // await sleep(5000);
   const response = await fetch(
     `${
       import.meta.env.VITE_API_URL
@@ -83,6 +84,40 @@ export async function deleteTransactionByTnxIdAndSpaceId(
     }
   );
   if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+}
+
+export async function updateTransactionByTnxIdAndSpaceId(
+  spaceId: string,
+  tnxId: string,
+  payload: UpdateTransactionPayload
+): Promise<CommonReturn> {
+  await sleep(5000);
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/spaces/${
+      spaceId
+    }/transactions/${tnxId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+}
+
+export async function checkSpaceExists(spaceId:string):Promise<CommonReturn>  {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/spaces/${spaceId}/status`, {
+    method: "GET",
+  });
+  if (!response.ok) { 
     throw new Error("Network response was not ok");
   }
   return response.json();

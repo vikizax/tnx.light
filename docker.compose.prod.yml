@@ -1,0 +1,66 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: DockerFile.prod
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./frontend/.env
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
+      ENVIRONMENT: PROD
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: DockerFile.prod
+    ports:
+      - "4000:5000"
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
+      ENVIRONMENT: PROD
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+  kysely_migrations:
+    image: kysely_migrations:latest
+    build: kysely_migrations
+    container_name: kysely_migrations_tnx
+    env_file:
+      - ./kysely_migrations/.env
+    depends_on:
+      postgres:
+        condition: service_started
+      backend:
+        condition: service_started
+    # entrypoint: ["/bin/bash","-c","while true; do echo \"Hello World\"; sleep 10; done;"]
+    # restart: on-failure
+volumes:
+  postgres_data:

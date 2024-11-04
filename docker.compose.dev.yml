@@ -7,6 +7,9 @@ services:
       - "8080:8080"
     env_file:
       - ./frontend/.env
+    environment:
+      NODE_OPTIONS: --max-old-space-size=3072
+      ENVIRONMENT: DEV
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -23,6 +26,7 @@ services:
       - ./backend/.env
     environment:
       NODE_OPTIONS: --max-old-space-size=3072
+      ENVIRONMENT: DEV
     volumes:
       - ./backend:/app
     depends_on:

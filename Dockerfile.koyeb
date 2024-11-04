@@ -7,4 +7,4 @@ WORKDIR /motac-apis
 COPY . /motac-apis/
 
 # Run Docker Compose using the compose file in /motac-apis
-CMD ["docker-compose", "-f", "/motac-apis/docker.compose.yml", "up"]
+CMD ["docker-compose", "-f", "/motac-apis/docker.compose.prod.yml", "up"]

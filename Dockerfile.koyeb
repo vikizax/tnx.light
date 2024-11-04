@@ -4,4 +4,4 @@ WORKDIR /tnx-light
 
 COPY . /tnx-light/
 
-CMD ["docker-compose", "-f", "/motac-apis/docker.compose.prod.yml", "up"]
+CMD ["docker-compose", "-f", "/tnx-light/docker.compose.prod.yml", "up"]

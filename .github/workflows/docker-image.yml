@@ -31,8 +31,8 @@ jobs:
           files: docker.compose.prod.yml
           push: true
           tags: |
-            your-dockerhub-username/tnx-light-frontend:latest
-            your-dockerhub-username/tnx-light-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tnx-light-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/tnx-light-backend:latest
 
       - name: Log out from Docker Hub
         run: docker logout

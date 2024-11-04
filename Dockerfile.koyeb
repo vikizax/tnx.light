@@ -1,10 +1,7 @@
 FROM koyeb/docker-compose
 
-# Set the working directory inside the container
-WORKDIR /motac-apis
+WORKDIR /tnx-light
 
-# Copy everything from the current directory on the host into /motac-apis in the container
-COPY . /motac-apis/
+COPY . /tnx-light/
 
-# Run Docker Compose using the compose file in /motac-apis
 CMD ["docker-compose", "-f", "/motac-apis/docker.compose.prod.yml", "up"]

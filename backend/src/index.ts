@@ -19,7 +19,7 @@ import fastifyMutipart from "@fastify/multipart";
   server.register(swagger, {
     swagger: {
       info: { title: "LightTnx API Documentation", version: "1.0" },
-      schemes: ["http"],
+      schemes: ["http", "https"],
       consumes: ["application/json", "multipart/form-data"],
       produces: ["application/json", "application/octet-stream", "text/plain"],
     },

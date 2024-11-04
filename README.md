@@ -12,3 +12,14 @@
 * backend swagger docs via
 
     ``http://localhost:4000/docs``
+
+
+## Live Deployed
+
+* frontend url:
+
+    ```https://tnx-light-vikizaxs-projects.vercel.app/```
+
+* backend swagger docs url:
+
+    ```https://joint-hermine-tnx-light-0384da50.koyeb.app/docs```

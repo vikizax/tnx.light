@@ -1,6 +1,9 @@
 # tnx.light
 
 ## Local start instruction
+- make sure to install all npm dependencies of all the folders [frontend, backend, kysely_migrations]
+
+  `npm i` 
 
 - start the docker containers using
 

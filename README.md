@@ -20,6 +20,6 @@
 
   [tnx.light.frontend](https://tnx-light-vikizaxs-projects.vercel.app/)
 
-- backend swagger docs url:
+- backend swagger docs url(use https schema):
 
   [tnx.light.backend/swagger-docs](https://joint-hermine-tnx-light-0384da50.koyeb.app/docs)

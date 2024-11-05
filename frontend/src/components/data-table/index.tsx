@@ -98,7 +98,7 @@ const DataTable = ({
           )}
           {data.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} sx={{ textAlign: "center" }}>
+              <TableCell colSpan={6} sx={{ textAlign: "center" }}>
                 no data ,maybe check your{" "}
                 <strong>
                   <u>filters</u>

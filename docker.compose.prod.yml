@@ -60,7 +60,7 @@ services:
         condition: service_started
       backend:
         condition: service_started
-    # entrypoint: ["/bin/bash","-c","while true; do echo \"Hello World\"; sleep 10; done;"]
-    # restart: on-failure
+    entrypoint: ["/bin/bash","-c","while true; do echo \"Hello World\"; sleep 10; done;"]
+    # restart: on-failures
 volumes:
   postgres_data:

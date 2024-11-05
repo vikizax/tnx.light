@@ -177,7 +177,11 @@ const TransactionsPage = () => {
 
         {!isLoading && !isPending && (
           <Stack direction={"row"} gap={4} flexWrap="wrap" padding={1}>
-            <Stack gap={1} direction={isScreenSmall ? "row" : "column"}>
+            <Stack
+              gap={1}
+              direction={isScreenSmall ? "row" : "column"}
+              flexWrap={"wrap"}
+            >
               <ActionButton
                 onClick={() =>
                   dispatch(

@@ -27,15 +27,6 @@ jobs:
         with:
           install: true  # Ensure Buildx is installed and set up
 
-      # Build and push frontend service
-      - name: Build and push frontend service
-        uses: docker/build-push-action@v4
-        with:
-          context: ./frontend  # Path to your frontend Dockerfile directory
-          file: ./frontend/DockerFile.prod
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
-
       # Build and push backend service
       - name: Build and push backend service
         uses: docker/build-push-action@v4
@@ -43,7 +34,7 @@ jobs:
           context: ./backend  # Path to your backend Dockerfile directory
           file: ./backend/DockerFile.prod
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tnx.backend:latest
 
       - name: Log out from Docker Hub
         run: docker logout

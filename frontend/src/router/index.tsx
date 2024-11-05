@@ -3,6 +3,7 @@ import App from "../App";
 import DashboardLayout from "../layouts/dashboard";
 import TransactionsPage from "../pages/dashboard/transactions";
 import { ColorPalette } from "../utils/commons/color-palette";
+import NotFound from "../pages/not-found";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -28,10 +29,6 @@ export const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: (
-      <h2 style={{ color: ColorPalette.color }}>
-        Its going to be not found here soon
-      </h2>
-    ),
+    element: <NotFound />
   },
 ]);

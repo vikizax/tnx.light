@@ -1,7 +1,7 @@
 import { Stack, Typography } from "@mui/material";
-import NotFoundSvg from "./404.svg?react";
-import { ColorPalette } from "../../utils/commons/color-palette";
 import { Link } from "react-router-dom";
+import { ColorPalette } from "../../utils/commons/color-palette";
+import NotFoundSvg from "./404.svg?react";
 
 const NotFound = () => {
   return (

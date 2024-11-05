@@ -12,20 +12,20 @@ import { ColorPalette } from "./utils/commons/color-palette";
 function App() {
   const navigate = useNavigate();
   const localSpaceId = localStorage.getItem("spaceId");
-  const { mutateAsync, status } = useMutation({
-    mutationFn:  createSpace,
+  const { mutateAsync, status, isPending } = useMutation({
+    mutationFn: createSpace,
   });
 
-  const {refetch: isExist} = useQuery({
-    queryKey: ['spaceCheck'],
+  const { refetch: isExist } = useQuery({
+    queryKey: ["spaceCheck"],
     queryFn: () => checkSpaceExists(localSpaceId!),
-    enabled: false
-  })  
+    enabled: false,
+  });
 
   const handleStartAction = async () => {
     if (localSpaceId) {
-      const res = await isExist()
-      if(res.data?.data) {
+      const res = await isExist();
+      if (res.data?.data) {
         navigate(`space/${localSpaceId}/transactions`);
         return;
       }
@@ -36,6 +36,7 @@ function App() {
     if (spaceId !== undefined) {
       localStorage.setItem("spaceId", spaceId + "");
       navigate(`space/${spaceId}/transactions`);
+      return;
     }
   };
 
@@ -104,12 +105,16 @@ function App() {
         >
           your companion to manage all your transactions
         </Typography>
-        {status === "idle" && (
-          <ActionButton isactive onClick={handleStartAction}>
+        {status === "idle" && !isPending && (
+          <ActionButton
+            isactive
+            onClick={handleStartAction}
+            disabled={isPending}
+          >
             get started now!
           </ActionButton>
         )}
-        {status === "pending" && <GradientCircularProgress />}
+        {status === "pending" && isPending && <GradientCircularProgress />}
       </Stack>
     </Container>
   );

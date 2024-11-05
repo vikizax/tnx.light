@@ -12,6 +12,9 @@ export const CreateSpaceTnxSchema = Type.Object({
   createdAt: Type.String({ format: "date" }),
   description: Type.Optional(Type.String()),
   category: Type.Optional(Type.String()),
+  recurring: Type.Optional(
+    Type.Union([Type.Literal("weekly"), Type.Literal("monthly")])
+  ),
 });
 
 export type CreateSpaceTnx = Static<typeof CreateSpaceTnxSchema>;
@@ -45,6 +48,9 @@ export const GetAllTransactionsQueryParamsSchema = Type.Object({
     Type.String({
       minLength: 1,
     })
+  ),
+  recurring: Type.Optional(
+    Type.Union([Type.Literal("weekly"), Type.Literal("monthly")])
   ),
 });
 

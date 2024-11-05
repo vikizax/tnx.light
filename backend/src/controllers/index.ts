@@ -25,42 +25,43 @@ import {
 } from "./types";
 
 export function SpaceActions(fastify: FastifyInstance) {
-    // check space exists
-    fastify.get<{ Reply: CommonResponse, Params: SpaceTnxParams }>(
-      "/spaces/:spaceId/status",
-      {
-        schema: {
-          tags: ["spaces"],
-          description: "Check if space exists",
-          response: {
-            200: CommonResponseSchema,
-          },
-          params: SpaceTnxParamsSchema
+  // check space exists
+  fastify.get<{ Reply: CommonResponse; Params: SpaceTnxParams }>(
+    "/:spaceId/status",
+    {
+      schema: {
+        tags: ["spaces"],
+        description: "Check if space exists",
+        response: {
+          200: CommonResponseSchema,
         },
+        params: SpaceTnxParamsSchema,
       },
-      async (req, rep) => {
-        
-        const [isExists, error] = await intoResultAsync(checkSpaceExists, req.params.spaceId);
-        
-        if (error) {
-          logs("ERROR >> ");
-          logs(error);
-          return rep.internalServerError(
-            "Something went wrong while checking for space"
-          );
-        }
-  
-        return rep.code(200).send({
-          status: 200,
-          data: isExists,
-        });
-      }
-    );
+    },
+    async (req, rep) => {
+      const [isExists, error] = await intoResultAsync(
+        checkSpaceExists,
+        req.params.spaceId
+      );
 
+      if (error) {
+        logs("ERROR >> ");
+        logs(error);
+        return rep.internalServerError(
+          "Something went wrong while checking for space"
+        );
+      }
+
+      return rep.code(200).send({
+        status: 200,
+        data: isExists,
+      });
+    }
+  );
 
   // create a space
   fastify.post<{ Reply: CommonResponse }>(
-    "/spaces",
+    "/",
     {
       schema: {
         tags: ["spaces"],
@@ -95,7 +96,7 @@ export function SpaceActions(fastify: FastifyInstance) {
     Params: SpaceTnxParams;
     Reply: CommonResponse;
   }>(
-    "/spaces/:spaceId/transactions",
+    "/:spaceId/transactions",
     {
       schema: {
         querystring: GetAllTransactionsQueryParamsSchema,
@@ -136,7 +137,7 @@ export function SpaceActions(fastify: FastifyInstance) {
     Reply: CommonResponse;
     Body: CreateSpaceTnx;
   }>(
-    "/spaces/:spaceId/transactions",
+    "/:spaceId/transactions",
     {
       schema: {
         params: SpaceTnxParamsSchema,
@@ -173,7 +174,7 @@ export function SpaceActions(fastify: FastifyInstance) {
     Reply: CommonResponse;
     Body: UpdateSpaceTnx;
   }>(
-    "/spaces/:spaceId/transactions/:transactionId",
+    "/:spaceId/transactions/:transactionId",
     {
       schema: {
         body: UpdateSpaceTnxSchema,
@@ -210,7 +211,7 @@ export function SpaceActions(fastify: FastifyInstance) {
     Params: DeleteSpaceTnxParams;
     Reply: CommonResponse;
   }>(
-    "/spaces/:spaceId/transactions/:transactionId",
+    "/:spaceId/transactions/:transactionId",
     {
       schema: {
         params: DeleteSpaceTnxParamsSchema,

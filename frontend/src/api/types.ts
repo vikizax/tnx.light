@@ -1,4 +1,5 @@
 export type TransactionType = "expense" | "income";
+export type TransactionRecurringType = "weekly" | "monthly";
 
 export type CommonReturn = {
   status: number;
@@ -15,6 +16,7 @@ export type Transaction = {
   description: string;
   created_at: string;
   updated_at: string[];
+  recurring_type: TransactionRecurringType | null;
 };
 
 export type GetAllTransactions = {
@@ -39,6 +41,10 @@ export type CreateTransactionPayload = {
   category?: string;
   description?: string;
   createdAt: string;
+  recurring?: TransactionRecurringType;
 };
 
-export type UpdateTransactionPayload = Omit<CreateTransactionPayload, 'spaceId'>
+export type UpdateTransactionPayload = Omit<
+  CreateTransactionPayload,
+  "spaceId"
+>;

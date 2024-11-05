@@ -1,21 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { TransactionRecurringType } from "../../api/types";
 
 export type TransactionType = "income" | "expense";
 
 export interface TransactionFiltersState {
   page: number;
   limit: number;
-  type?: TransactionType | "";
+  type?: TransactionType;
   category?: string;
   date?: string;
+  recurring?: TransactionRecurringType
 }
 
 const initialState: TransactionFiltersState = {
   limit: 10,
   page: 1,
-  category: "",
-  date: "",
-  type: "",
 };
 
 export function getFilterValueTyped<K extends keyof TransactionFiltersState>(

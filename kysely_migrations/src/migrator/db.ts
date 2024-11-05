@@ -9,6 +9,7 @@ export const db = new Kysely<any>({
       user: process.env["POSTGRES_USER"] ?? "user",
       password: process.env["POSTGRES_PASSWORD"] ?? "tnxligthdb",
       port: parseInt(process.env["POSTGRES_PORT"]!) ?? 5432,
+      ssl: process.env["ENVIRONMENT"] === "PROD",
     }),
   }),
 });

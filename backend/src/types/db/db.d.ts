@@ -15,6 +15,14 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface TNXSCHEMARecurringTnx {
+  created_at: Generated<Timestamp | null>;
+  id: Generated<Int8>;
+  transaction_id: Int8;
+  type: string;
+  updated_at: Generated<Timestamp | null>;
+}
+
 export interface TNXSCHEMASpaces {
   created_at: Generated<Timestamp | null>;
   id: Generated<Int8>;
@@ -32,6 +40,7 @@ export interface TNXSCHEMATransactions {
 }
 
 export interface DB {
+  "TNX_SCHEMA.recurring_tnx": TNXSCHEMARecurringTnx;
   "TNX_SCHEMA.spaces": TNXSCHEMASpaces;
   "TNX_SCHEMA.transactions": TNXSCHEMATransactions;
 }

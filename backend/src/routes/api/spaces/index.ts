@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import { SpaceActions } from "../../controllers";
+import { SpaceActions } from "../../../controllers";
 
 export const route: FastifyPluginAsync = async (fastify) => {
   SpaceActions(fastify);

@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import {
   Box,
   CircularProgress,
@@ -14,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { deleteTransactionByTnxIdAndSpaceId } from "../../../api";
-import { Transaction } from "../../../api/types";
+import { Transaction, TransactionRecurringType } from "../../../api/types";
 import ActionButton from "../../../components/action-button";
 import DataTable from "../../../components/data-table";
 import PageHead from "../../../components/page-head";
@@ -30,13 +31,17 @@ import { ColorPalette, Units } from "../../../utils/commons/color-palette";
 import FilterChip from "./_components/FilterChips";
 import MenuFilters from "./_components/MenuFilters";
 import TnxDrawer from "./_components/TnxDrawer";
+
 type MenuFilterOption = "category" | "date";
 
 const TransactionsPage = () => {
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.between("xs", 950));
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [recurringMenuAnchorEl, setRecurringMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
+  const recurringMenuOpen = Boolean(recurringMenuAnchorEl);
   const menuOptionRef = useRef<HTMLInputElement>(null);
   const params = useParams<{ spaceId: string }>();
   const dispatch = useDispatch();
@@ -91,13 +96,30 @@ const TransactionsPage = () => {
     setMenuAnchorEl(event.currentTarget);
   };
 
+  const handleRecurringBtnClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    setRecurringMenuAnchorEl(event.currentTarget);
+  };
+
   const handleFilterMenuClick = (menuOption: MenuFilterOption) => {
     setMenuAnchorEl(null);
     setCurrentActiveMenuOpts(menuOption);
-    console.log(menuOptionRef.current);
     if (menuOptionRef.current) {
       menuOptionRef.current.focus();
     }
+  };
+
+  const handleRecurringMenuClick = (
+    recurringOption: TransactionRecurringType
+  ) => {
+    setRecurringMenuAnchorEl(null);
+    dispatch(
+      setFilter({
+        filter: "recurring",
+        value: getFilterValueTyped("recurring", recurringOption),
+      })
+    );
   };
 
   const handleTransactionDelete = async (id: string) => {
@@ -182,19 +204,28 @@ const TransactionsPage = () => {
               >
                 expense
               </ActionButton>
+
+              <ActionButton
+                endIcon={<EventRepeatIcon />}
+                onClick={handleRecurringBtnClick}
+              >
+                recurring
+              </ActionButton>
+
               <ActionButton
                 endIcon={<FilterListIcon />}
                 onClick={handleFilterBtnClick}
               >
                 filters
               </ActionButton>
+
               <Menu
-                id="basic-menu"
+                id="filter-menu"
                 anchorEl={menuAnchorEl}
                 open={menuOpen}
                 onClose={() => setMenuAnchorEl(null)}
                 MenuListProps={{
-                  "aria-labelledby": "menu-button",
+                  "aria-labelledby": "filter-menu-button",
                   sx: {
                     color: "white",
                     padding: 0,
@@ -220,6 +251,41 @@ const TransactionsPage = () => {
                 </MenuItem>
                 <MenuItem onClick={() => handleFilterMenuClick("date")}>
                   date
+                </MenuItem>
+              </Menu>
+
+              <Menu
+                id="recurring-menu"
+                anchorEl={recurringMenuAnchorEl}
+                open={recurringMenuOpen}
+                onClose={() => setRecurringMenuAnchorEl(null)}
+                MenuListProps={{
+                  "aria-labelledby": "recurring-menu-button",
+                  sx: {
+                    color: "white",
+                    padding: 0,
+                    "& li:hover": {
+                      backgroundColor: ColorPalette.hoverBgColor,
+                    },
+                  },
+                }}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      marginTop: 1,
+                      borderRadius: Units.borderRadius,
+                      backgroundColor: ColorPalette.bgColor,
+                      border: `1px solid ${ColorPalette.borderColor}`,
+                      padding: 0,
+                    },
+                  },
+                }}
+              >
+                <MenuItem onClick={() => handleRecurringMenuClick("weekly")}>
+                  weekly
+                </MenuItem>
+                <MenuItem onClick={() => handleRecurringMenuClick("monthly")}>
+                  monthly
                 </MenuItem>
               </Menu>
             </Stack>

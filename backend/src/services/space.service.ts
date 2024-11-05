@@ -1,19 +1,20 @@
-import { sql } from "kysely";
+import { Kysely, sql } from "kysely";
 import { db } from "../db";
 import {
   CreateSpaceTnx,
   GetAllTransactionsQueryParams,
   UpdateSpaceTnx,
 } from "../controllers/types";
+import { DB } from "../types/db/db";
 
-export async function checkSpaceExists(spaceId:number) {
+export async function checkSpaceExists(spaceId: number) {
   const res = await db
-    .selectFrom('TNX_SCHEMA.spaces')
-    .select(({fn}) => fn.countAll().as('count'))
-    .where('id', '=', spaceId+'')
-    .executeTakeFirst()
-  
-    return res ? parseInt(res.count+'') > 0 : false
+    .selectFrom("TNX_SCHEMA.spaces")
+    .select(({ fn }) => fn.countAll().as("count"))
+    .where("id", "=", spaceId + "")
+    .executeTakeFirst();
+
+  return res ? parseInt(res.count + "") > 0 : false;
 }
 
 export async function createSpace() {
@@ -32,18 +33,38 @@ export async function getAllTnxBySpaceId(
   filters?: Omit<GetAllTransactionsQueryParams, "limit" | "page">
 ) {
   let totaltnxCursor = db
-    .selectFrom("TNX_SCHEMA.transactions")
+    .selectFrom("TNX_SCHEMA.transactions as tnx")
+    .leftJoin(
+      "TNX_SCHEMA.recurring_tnx as rtnx",
+      "tnx.id",
+      "rtnx.transaction_id"
+    )
     .select(({ fn }) => fn.countAll().as("count"))
     .where("space_id", "=", spaceId + "");
 
   let resCursor = db
-    .selectFrom("TNX_SCHEMA.transactions")
-    .selectAll()
+    .selectFrom("TNX_SCHEMA.transactions as tnx")
+    .leftJoin(
+      "TNX_SCHEMA.recurring_tnx as rtnx",
+      "tnx.id",
+      "rtnx.transaction_id"
+    )
+    .select([
+      "tnx.id",
+      "tnx.space_id",
+      "tnx.amount",
+      "tnx.type",
+      "tnx.category",
+      "tnx.description",
+      "tnx.created_at",
+      "tnx.updated_at",
+      "rtnx.type as recurring_type",
+    ])
     .where("space_id", "=", spaceId + "");
 
   if (filters?.type) {
-    resCursor = resCursor.where("type", "=", filters.type);
-    totaltnxCursor = totaltnxCursor.where("type", "=", filters.type);
+    resCursor = resCursor.where("tnx.type", "=", filters.type);
+    totaltnxCursor = totaltnxCursor.where("tnx.type", "=", filters.type);
   }
 
   if (filters?.date) {
@@ -54,10 +75,15 @@ export async function getAllTnxBySpaceId(
       new Date(filters.date)
     );
   }
-  
+
   if (filters?.category) {
     resCursor = resCursor.where("category", "=", filters.category);
     totaltnxCursor = totaltnxCursor.where("category", "=", filters.category);
+  }
+
+  if (filters?.recurring) {
+    resCursor = resCursor.where("rtnx.type", "=", filters.recurring);
+    totaltnxCursor = totaltnxCursor.where("rtnx.type", "=", filters.recurring);
   }
 
   const totaltnx = await totaltnxCursor.executeTakeFirst();
@@ -78,17 +104,35 @@ export async function createTnxBySpaceId(
   spaceId: number,
   payload: CreateSpaceTnx
 ) {
-  await db
-    .insertInto("TNX_SCHEMA.transactions")
-    .values({
-      amount: payload.amount,
-      space_id: spaceId,
-      category: payload.category,
-      created_at: payload.createdAt,
-      description: payload.description,
-      type: payload.type,
-    })
-    .execute();
+  const createTnx = async (db: Kysely<DB>) => {
+    return await db
+      .insertInto("TNX_SCHEMA.transactions")
+      .values({
+        amount: payload.amount,
+        space_id: spaceId,
+        category: payload.category,
+        created_at: payload.createdAt,
+        description: payload.description,
+        type: payload.type,
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
+  };
+
+  if (!payload.recurring) {
+    await createTnx(db);
+  } else {
+    await db.transaction().execute(async (tnx) => {
+      const tnxId = await createTnx(db);
+      tnx
+        .insertInto("TNX_SCHEMA.recurring_tnx")
+        .values({
+          transaction_id: tnxId.id,
+          type: payload.recurring!,
+        })
+        .execute();
+    });
+  }
 }
 
 export async function updateTnxBySpaceIdTnxId(

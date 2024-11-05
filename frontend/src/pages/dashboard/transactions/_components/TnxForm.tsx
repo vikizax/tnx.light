@@ -18,20 +18,23 @@ import InputField from "../../../../components/input";
 import SelectField from "../../../../components/select";
 import { ColorPalette } from "../../../../utils/commons/color-palette";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTransaction, updateTransactionByTnxIdAndSpaceId } from "../../../../api";
+import {
+  createTransaction,
+  updateTransactionByTnxIdAndSpaceId,
+} from "../../../../api";
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { open } from "../../../../store/slices/snack.slice";
-import { UpdateTransactionPayload } from "../../../../api/types";
+import { TransactionRecurringType, TransactionType, UpdateTransactionPayload } from "../../../../api/types";
 
 type TnxFormData = {
-  type: "income" | "expense";
+  type: TransactionType;
   amount: string | "";
   category: string;
   date: string;
   description: string;
   isRecurring: boolean;
-  recurrenceFrequency: "weekly" | "monthly";
+  recurrenceFrequency: TransactionRecurringType;
 };
 
 const TnxForm = ({
@@ -39,7 +42,7 @@ const TnxForm = ({
   initialFormData,
 }: {
   toggleDrawer: (newOpen: boolean) => () => void;
-  initialFormData?: TnxFormData & {tnxId: string};
+  initialFormData?: TnxFormData & { tnxId: string };
 }) => {
   const params = useParams<{ spaceId: string }>();
 
@@ -70,17 +73,25 @@ const TnxForm = ({
     onError: () => dispatch(open("something went wrong. try again")),
   });
 
-  const {mutateAsync: updateMutateAsync, isPending: isPendingUpdate} = useMutation({
-    mutationFn:async ({spaceId,tnxId, payload}: {spaceId:string, tnxId:string, payload: UpdateTransactionPayload}) => updateTransactionByTnxIdAndSpaceId(spaceId, tnxId,payload),
-    onSuccess: async() => {
-      toggleDrawer(false)();
-      dispatch(open("transaction updated"));
-      await queryClient.invalidateQueries({
-        queryKey: ["transactions"],
-      });
-    }
-  })
-
+  const { mutateAsync: updateMutateAsync, isPending: isPendingUpdate } =
+    useMutation({
+      mutationFn: async ({
+        spaceId,
+        tnxId,
+        payload,
+      }: {
+        spaceId: string;
+        tnxId: string;
+        payload: UpdateTransactionPayload;
+      }) => updateTransactionByTnxIdAndSpaceId(spaceId, tnxId, payload),
+      onSuccess: async () => {
+        toggleDrawer(false)();
+        dispatch(open("transaction updated"));
+        await queryClient.invalidateQueries({
+          queryKey: ["transactions"],
+        });
+      },
+    });
 
   const handleChange = (
     event:
@@ -105,17 +116,18 @@ const TnxForm = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log({initialFormData, formData})
-    if(initialFormData) {
+    console.log({ initialFormData, formData });
+    if (initialFormData) {
       await updateMutateAsync({
         spaceId: params.spaceId!,
         tnxId: initialFormData.tnxId,
         payload: {
           ...formData,
-          createdAt: formData.date
-        }
-      })
-    }else {
+          createdAt: formData.date,
+          recurring: formData.recurrenceFrequency
+        },
+      });
+    } else {
       await mutateAsync({
         spaceId: params.spaceId!,
         amount: formData.amount + "",
@@ -125,7 +137,6 @@ const TnxForm = ({
         description: formData.description,
       });
     }
-
   };
 
   return (
@@ -159,6 +170,9 @@ const TnxForm = ({
               value={formData.amount}
               onChange={handleChange}
               slotProps={{
+                htmlInput: {
+                  min: 1,
+                },
                 input: {
                   endAdornment: (
                     <InputAdornment

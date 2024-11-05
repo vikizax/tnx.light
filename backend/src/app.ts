@@ -14,10 +14,10 @@ const app: FastifyPluginAsync<AppOptions> = async (
 ): Promise<void> => {
   // Place here your custom code!
   // Do not touch the following lines
-  void fastify.register(import('@fastify/rate-limit'), {
+  void fastify.register(import("@fastify/rate-limit"), {
     max: 100,
-    timeWindow: '1 minute'
-  })
+    timeWindow: "1 minute",
+  });
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application

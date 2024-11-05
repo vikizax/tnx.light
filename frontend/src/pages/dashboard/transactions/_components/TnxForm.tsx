@@ -25,7 +25,11 @@ import {
 import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { open } from "../../../../store/slices/snack.slice";
-import { TransactionRecurringType, TransactionType, UpdateTransactionPayload } from "../../../../api/types";
+import {
+  TransactionRecurringType,
+  TransactionType,
+  UpdateTransactionPayload,
+} from "../../../../api/types";
 
 type TnxFormData = {
   type: TransactionType;
@@ -34,7 +38,7 @@ type TnxFormData = {
   date: string;
   description: string;
   isRecurring: boolean;
-  recurrenceFrequency: TransactionRecurringType;
+  recurrenceFrequency: TransactionRecurringType | null;
 };
 
 const TnxForm = ({
@@ -49,26 +53,24 @@ const TnxForm = ({
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
-  const [formData, setFormData] = useState<TnxFormData>(
-    initialFormData ?? {
-      type: "income",
-      amount: "",
-      category: "",
-      date: "",
-      description: "",
-      isRecurring: false,
-      recurrenceFrequency: "weekly",
-    }
-  );
+  const [formData, setFormData] = useState<TnxFormData>({
+    type: initialFormData?.type ?? "income",
+    amount: initialFormData?.amount ?? "",
+    category: initialFormData?.category ?? "",
+    date: initialFormData?.date ?? "",
+    description: initialFormData?.description ?? "",
+    isRecurring: initialFormData?.isRecurring ?? false,
+    recurrenceFrequency: initialFormData?.recurrenceFrequency ?? "weekly",
+  });
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: createTransaction,
     onSuccess: async () => {
       toggleDrawer(false)();
-      dispatch(open("transaction created"));
       await queryClient.invalidateQueries({
         queryKey: ["transactions"],
       });
+      dispatch(open("transaction created"));
     },
     onError: () => dispatch(open("something went wrong. try again")),
   });
@@ -86,10 +88,10 @@ const TnxForm = ({
       }) => updateTransactionByTnxIdAndSpaceId(spaceId, tnxId, payload),
       onSuccess: async () => {
         toggleDrawer(false)();
-        dispatch(open("transaction updated"));
         await queryClient.invalidateQueries({
           queryKey: ["transactions"],
         });
+        dispatch(open("transaction updated"));
       },
     });
 
@@ -116,7 +118,6 @@ const TnxForm = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log({ initialFormData, formData });
     if (initialFormData) {
       await updateMutateAsync({
         spaceId: params.spaceId!,
@@ -124,7 +125,9 @@ const TnxForm = ({
         payload: {
           ...formData,
           createdAt: formData.date,
-          recurring: formData.recurrenceFrequency
+          recurring: formData.isRecurring
+            ? formData.recurrenceFrequency!
+            : undefined,
         },
       });
     } else {

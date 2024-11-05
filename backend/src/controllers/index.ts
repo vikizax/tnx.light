@@ -20,6 +20,7 @@ import {
   SpaceTnxParams,
   SpaceTnxParamsSchema,
   UpdateSpaceTnx,
+  UpdateSpaceTnxParamsSchema,
   UpdateSpaceTnxQuery,
   UpdateSpaceTnxSchema,
 } from "./types";
@@ -178,7 +179,7 @@ export function SpaceActions(fastify: FastifyInstance) {
     {
       schema: {
         body: UpdateSpaceTnxSchema,
-        params: UpdateSpaceTnxSchema,
+        params: UpdateSpaceTnxParamsSchema,
         response: { 200: CommonResponseSchema },
         tags: ["spaces"],
         description: "Update a transaction of a space",

@@ -140,19 +140,54 @@ export async function updateTnxBySpaceIdTnxId(
   tnxId: number,
   payload: UpdateSpaceTnx
 ) {
-  await db
-    .updateTable("TNX_SCHEMA.transactions")
-    .set({
-      amount: payload.amount,
-      category: payload.category,
-      description: payload.description,
-      created_at: payload.createdAt,
-      type: payload.type,
-      updated_at: sql`now()`,
-    })
-    .where("id", "=", tnxId + "")
-    .where("space_id", "=", spaceId + "")
-    .execute();
+  const updateTnx = async (db: Kysely<DB>) => {
+    await db
+      .updateTable("TNX_SCHEMA.transactions")
+      .set({
+        amount: payload.amount,
+        category: payload.category,
+        description: payload.description,
+        created_at: payload.createdAt,
+        type: payload.type,
+        updated_at: sql`now()`,
+      })
+      .where("id", "=", tnxId + "")
+      .where("space_id", "=", spaceId + "")
+      .execute();
+  };
+
+  if (!payload.recurring) {
+    await updateTnx(db);
+  } else {
+    db.transaction().execute(async (tnx) => {
+      await updateTnx(tnx);
+
+      const recurringExists = await tnx
+        .selectFrom("TNX_SCHEMA.recurring_tnx")
+        .select(({ fn }) => fn.countAll().as("count"))
+        .where("transaction_id", "=", tnxId + "")
+        .executeTakeFirstOrThrow();
+
+      if (parseInt(recurringExists.count + "") > 0) {
+        await tnx
+          .updateTable("TNX_SCHEMA.recurring_tnx")
+          .set({
+            type: payload.recurring,
+            updated_at: sql`now()`,
+          })
+          .where("transaction_id", "=", tnxId + "")
+          .execute();
+      } else {
+        await tnx
+          .insertInto("TNX_SCHEMA.recurring_tnx")
+          .values({
+            type: payload.recurring!,
+            transaction_id: tnxId,
+          })
+          .execute();
+      }
+    });
+  }
 }
 
 export async function deleteTnxBySpaceIdTnxId(spaceId: number, tnxId: number) {

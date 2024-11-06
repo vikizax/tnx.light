@@ -70,15 +70,15 @@ export async function getAllTnxBySpaceId(
   if (filters?.date) {
     resCursor = resCursor.where("created_at", "=", new Date(filters.date));
     totaltnxCursor = totaltnxCursor.where(
-      "created_at",
+      "tnx.created_at",
       "=",
       new Date(filters.date)
     );
   }
 
   if (filters?.category) {
-    resCursor = resCursor.where("category", "=", filters.category);
-    totaltnxCursor = totaltnxCursor.where("category", "=", filters.category);
+    resCursor = resCursor.where("tnx.category", "=", filters.category);
+    totaltnxCursor = totaltnxCursor.where("tnx.category", "=", filters.category);
   }
 
   if (filters?.recurring) {

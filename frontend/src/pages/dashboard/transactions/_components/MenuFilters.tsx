@@ -27,7 +27,11 @@ const MenuFilters = ({
   const dispatch = useDispatch();
 
   const handleDispatchAction = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    console.log(e.key);
+    if (e.key === "Escape") {
+      setState("");
+      handler(null);
+      return;
+    }
     if (e.key !== "Enter") return;
     if (state.trim().length === 0) return;
     dispatch(

@@ -68,7 +68,7 @@ export async function getAllTnxBySpaceId(
   }
 
   if (filters?.date) {
-    resCursor = resCursor.where("created_at", "=", new Date(filters.date));
+    resCursor = resCursor.where("tnx.created_at", "=", new Date(filters.date));
     totaltnxCursor = totaltnxCursor.where(
       "tnx.created_at",
       "=",
